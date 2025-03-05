@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小红书文案排版工具</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff2f4;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #ff2e51;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(255, 46, 81, 0.15);
+    }
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+    button {
+      background-color: #ff2e51;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #e61c40;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #ff2e51;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      background-color: white;
+    }
+    .output-content {
+      white-space: pre-wrap;
+      font-size: 16px;
+      line-height: 1.6;
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e9ecef;
+      min-height: 150px;
+    }
+    .copy-btn {
+      background-color: #ff8596;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+    .copy-btn:hover {
+      background-color: #ff6b7f;
+    }
+    .emoji-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .emoji-btn {
+      font-size: 20px;
+      padding: 5px 10px;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .emoji-btn:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.1);
+    }
+    .emoji-btn.active {
+      background-color: #ffe6e8;
+      transform: scale(1.1);
+      border: 2px solid #ff2e51;
+      box-shadow: 0 0 5px rgba(255, 46, 81, 0.5);
+    }
+    .emoji-btn.active::after {
+      content: "";
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 10px;
+      height: 10px;
+      background-color: #ff2e51;
+      border-radius: 50%;
+    }
+    .format-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tab-container {
+      margin-top: 20px;
+    }
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background-color: transparent;
+      color: #333;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab-btn.active {
+      border-bottom-color: #ff2e51;
+      color: #ff2e51;
+    }
+    .tab-content {
+      padding: 15px 0;
+    }
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+    .checkbox-group {
+      margin-top: 10px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    .checkbox-label input {
+      margin-right: 8px;
+    }
+    .emoji-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .emoji-category-btn {
+      padding: 8px 15px;
+      background-color: #fff;
+      border: 1px solid #ff8596;
+      border-radius: 20px;
+      color: #ff2e51;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .emoji-category-btn:hover {
+      background-color: #ffe6e8;
+      color: #ff2e51;
+    }
+    .emoji-category-btn.active {
+      background-color: #ff2e51;
+      color: white;
+      box-shadow: 0 0 8px rgba(255, 46, 81, 0.6);
+    }
+    .emoji-container {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 5px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    @media (max-width: 768px) {
+      .format-options {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>小红书文案排版工具</h1>
+  
+  <div class="container">
+    <div class="card">
+      <h2>输入文本</h2>
+      <textarea id="inputText" placeholder="在此粘贴您需要排版的文本..."></textarea>
+    </div>
+    
+    <div class="card">
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="separator">分隔符排版</button>
+          <button class="tab-btn" data-tab="emoji">表情排版</button>
+          <button class="tab-btn" data-tab="custom">自定义排版</button>
+        </div>
+        
+        <div class="tab-content">
+          <!-- 分隔符排版选项 -->
+          <div class="panel active" id="separator-panel">
+            <div class="form-group">
+              <label for="separatorType">选择分隔符类型:</label>
+              <select id="separatorType">
+                <option value="none">无分隔符</option>
+                <option value="dot" selected>点号 (·)</option>
+                <option value="dash">短横线 (-)</option>
+                <option value="star">星号 (*)</option>
+                <option value="arrow">箭头 (→)</option>
+                <option value="heart">心形 (♥)</option>
+                <option value="custom">自定义</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="customSeparatorGroup" style="display: none;">
+              <label for="customSeparator">自定义分隔符:</label>
+              <input type="text" id="customSeparator" placeholder="输入您的自定义分隔符" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div class="form-group">
+              <label for="separatorStyle">分隔符样式:</label>
+              <select id="separatorStyle">
+                <option value="simple" selected>简单分隔 (·)</option>
+                <option value="spaced">带空格 ( · )</option>
+                <option value="triple">三连分隔 (···)</option>
+                <option value="centered">居中分隔 (   ·   )</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- 表情排版选项 -->
+          <div class="panel" id="emoji-panel">
+            <div class="form-group">
+              <label>选择表情分类:</label>
+              <div class="emoji-categories" id="emojiCategories">
+                <button class="emoji-category-btn active" data-category="common">常用表情</button>
+                <button class="emoji-category-btn" data-category="faces">表情表情包</button>
+                <button class="emoji-category-btn" data-category="numbers">数字表情包</button>
+                <button class="emoji-category-btn" data-category="symbols">标志表情包</button>
+                <button class="emoji-category-btn" data-category="plants">植物表情包</button>
+                <button class="emoji-category-btn" data-category="animals">动物表情包</button>
+                <button class="emoji-category-btn" data-category="foods">食物表情包</button>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>选择段落开头表情:</label>
+              <div class="emoji-container">
+                <div class="emoji-selector" id="emojiSelector">
+                  <!-- 这里的表情会根据分类动态加载 -->
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="emojiMode">表情应用模式:</label>
+              <select id="emojiMode">
+                <option value="all-same">所有段落使用相同表情</option>
+                <option value="first">仅第一段使用选中表情</option>
+                <option value="all-random">所有段落使用随机表情</option>
+                <option value="alternate">交替使用不同表情</option>
+              </select>
+            </div>
+            
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="keepOriginalEmojis" checked>
+                保留原文中已有的表情符号
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label for="emojiSeparatorType">添加分隔符:</label>
+              <select id="emojiSeparatorType">
+                <option value="none" selected>无分隔符</option>
+                <option value="dot">点号 (·)</option>
+                <option value="dash">短横线 (-)</option>
+                <option value="star">星号 (*)</option>
+                <option value="arrow">箭头 (→)</option>
+                <option value="heart">心形 (♥)</option>
+                <option value="custom">自定义</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="emojiCustomSeparatorGroup" style="display: none;">
+              <label for="emojiCustomSeparator">自定义分隔符:</label>
+              <input type="text" id="emojiCustomSeparator" placeholder="输入您的自定义分隔符" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div class="form-group">
+              <label for="emojiSeparatorStyle">分隔符样式:</label>
+              <select id="emojiSeparatorStyle">
+                <option value="simple" selected>简单分隔 (·)</option>
+                <option value="spaced">带空格 ( · )</option>
+                <option value="triple">三连分隔 (···)</option>
+                <option value="centered">居中分隔 (   ·   )</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- 自定义排版选项 -->
+          <div class="panel" id="custom-panel">
+            <div class="form-group">
+              <label>段落表情设置:</label>
+              <div class="paragraph-emoji-settings">
+                <select id="paragraphToApplyEmoji" style="margin-bottom: 10px; width: 100%">
+                  <option value="all">所有段落</option>
+                  <option value="0">第1段</option>
+                  <option value="1">第2段</option>
+                  <option value="2">第3段</option>
+                  <option value="3">第4段</option>
+                  <option value="4">第5段</option>
+                  <option value="5">第6段</option>
+                  <option value="6">第7段</option>
+                  <option value="7">第8段</option>
+                  <option value="8">第9段</option>
+                  <option value="9">第10段</option>
+                  <option value="10">第11段</option>
+                  <option value="11">第12段</option>
+                  <option value="12">第13段</option>
+                  <option value="13">第14段</option>
+                  <option value="14">第15段</option>
+                  <option value="15">第16段</option>
+                  <option value="16">第17段</option>
+                  <option value="17">第18段</option>
+                  <option value="18">第19段</option>
+                  <option value="19">第20段</option>
+                </select>
+                
+                <div class="form-group">
+                  <label>选择表情分类:</label>
+                  <div class="emoji-categories" id="customEmojiCategories">
+                    <button class="emoji-category-btn active" data-category="common">常用表情</button>
+                    <button class="emoji-category-btn" data-category="faces">表情表情包</button>
+                    <button class="emoji-category-btn" data-category="numbers">数字表情包</button>
+                    <button class="emoji-category-btn" data-category="symbols">标志表情包</button>
+                    <button class="emoji-category-btn" data-category="plants">植物表情包</button>
+                  </div>
+                </div>
+                
+                <div class="emoji-container">
+                  <div class="emoji-selector custom-paragraph-emoji">
+                    <!-- 这里的表情会根据分类动态加载 -->
+                  </div>
+                </div>
+                
+                <button id="applyParagraphEmoji" style="width: 100%; margin-top: 10px">应用表情到选中段落</button>
+              </div>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="customParagraphEmoji" checked>
+                  使用自定义段落表情设置
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>数字表情符号:</label>
+              <div class="emoji-categories" id="numberEmojiCategories">
+                <button class="emoji-category-btn active" data-category="numbers">数字表情</button>
+                <button class="emoji-category-btn" data-category="symbols">符号表情</button>
+              </div>
+              <div class="emoji-container">
+                <div class="emoji-selector" id="numberEmojiSelector">
+                  <!-- 这里的表情会根据分类动态加载 -->
+                </div>
+              </div>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="useNumberEmoji">
+                  使用数字表情作为段落序号
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="paragraphSpacing">段落间距:</label>
+              <select id="paragraphSpacing">
+                <option value="compact">紧凑 (单行间距)</option>
+                <option value="normal" selected>正常 (双行间距)</option>
+                <option value="loose">宽松 (三行间距)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="indentStyle">首行缩进:</label>
+              <select id="indentStyle">
+                <option value="none" selected>无缩进</option>
+                <option value="space-2">两个空格</option>
+                <option value="space-4">四个空格</option>
+                <option value="tab">制表符 (Tab)</option>
+              </select>
+            </div>
+            
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="addQuotes">
+                为段落添加引号
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="numberedParagraphs">
+                为段落添加序号
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label for="customSeparatorType">添加分隔符:</label>
+              <select id="customSeparatorType">
+                <option value="none" selected>无分隔符</option>
+                <option value="dot">点号 (·)</option>
+                <option value="dash">短横线 (-)</option>
+                <option value="star">星号 (*)</option>
+                <option value="arrow">箭头 (→)</option>
+                <option value="heart">心形 (♥)</option>
+                <option value="custom">自定义</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="customCustomSeparatorGroup" style="display: none;">
+              <label for="customCustomSeparator">自定义分隔符:</label>
+              <input type="text" id="customCustomSeparator" placeholder="输入您的自定义分隔符" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div class="form-group">
+              <label for="customSeparatorStyle">分隔符样式:</label>
+              <select id="customSeparatorStyle">
+                <option value="simple" selected>简单分隔 (·)</option>
+                <option value="spaced">带空格 ( · )</option>
+                <option value="triple">三连分隔 (···)</option>
+                <option value="centered">居中分隔 (   ·   )</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <button id="formatBtn">应用排版</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>排版结果</h2>
+      <div id="outputText" class="output-content"></div>
+      <button id="copyBtn" class="copy-btn">复制文本</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取DOM元素
+      const inputText = document.getElementById('inputText');
+      const outputText = document.getElementById('outputText');
+      const formatBtn = document.getElementById('formatBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      
+      // 分隔符选项
+      const separatorType = document.getElementById('separatorType');
+      const customSeparatorGroup = document.getElementById('customSeparatorGroup');
+      const customSeparator = document.getElementById('customSeparator');
+      const separatorStyle = document.getElementById('separatorStyle');
+      
+      // 表情排版选项
+      const emojiSelector = document.getElementById('emojiSelector');
+      const emojiMode = document.getElementById('emojiMode');
+      const keepOriginalEmojis = document.getElementById('keepOriginalEmojis');
+      const emojiSeparatorType = document.getElementById('emojiSeparatorType');
+      const emojiCustomSeparatorGroup = document.getElementById('emojiCustomSeparatorGroup');
+      const emojiCustomSeparator = document.getElementById('emojiCustomSeparator');
+      const emojiSeparatorStyle = document.getElementById('emojiSeparatorStyle');
+      
+      // 自定义排版选项
+      const paragraphToApplyEmoji = document.getElementById('paragraphToApplyEmoji');
+      const customParagraphEmoji = document.getElementById('customParagraphEmoji');
+      const applyParagraphEmoji = document.getElementById('applyParagraphEmoji');
+      const numberEmojiSelector = document.getElementById('numberEmojiSelector');
+      const useNumberEmoji = document.getElementById('useNumberEmoji');
+      const paragraphSpacing = document.getElementById('paragraphSpacing');
+      const indentStyle = document.getElementById('indentStyle');
+      const addQuotes = document.getElementById('addQuotes');
+      const numberedParagraphs = document.getElementById('numberedParagraphs');
+      const customSeparatorType = document.getElementById('customSeparatorType');
+      const customCustomSeparatorGroup = document.getElementById('customCustomSeparatorGroup');
+      const customCustomSeparator = document.getElementById('customCustomSeparator');
+      const customSeparatorStyle = document.getElementById('customSeparatorStyle');
+      
+      // 表情分类数据
+      const emojiData = {
+        common: [
+          {emoji: '🤔', description: '思考'},
+          {emoji: '📚', description: '书籍'},
+          {emoji: '💡', description: '灯泡'},
+          {emoji: '🌟', description: '星星'},
+          {emoji: '❤️', description: '红心'},
+          {emoji: '👍', description: '点赞'},
+          {emoji: '✨', description: '闪光'},
+          {emoji: '🎯', description: '靶心'},
+          {emoji: '🔍', description: '放大镜'},
+          {emoji: '🌈', description: '彩虹'},
+          {emoji: '🚀', description: '火箭'},
+          {emoji: '🌱', description: '幼苗'},
+          {emoji: '🧠', description: '大脑'},
+          {emoji: '🎨', description: '调色板'},
+          {emoji: '🔆', description: '高亮'},
+          {emoji: '📝', description: '笔记'},
+          {emoji: '🔥', description: '火焰'},
+          {emoji: '💥', description: '爆炸'},
+          {emoji: '✅', description: '对勾'},
+          {emoji: '✔️', description: '勾选'},
+          {emoji: '💖', description: '闪亮心'},
+          {emoji: '💕', description: '爱心'},
+          {emoji: '💘', description: '箭心'},
+          {emoji: '💪', description: '肌肉'},
+          {emoji: '👏', description: '鼓掌'},
+          {emoji: '🙏', description: '祈祷'},
+          {emoji: '🎉', description: '庆祝'},
+          {emoji: '🎊', description: '礼花'},
+          {emoji: '🎁', description: '礼物'},
+          {emoji: '🏆', description: '奖杯'},
+          {emoji: '🥇', description: '金牌'},
+          {emoji: '📌', description: '图钉'},
+          {emoji: '📍', description: '定位'},
+          {emoji: '📋', description: '剪贴板'},
+          {emoji: '📱', description: '手机'},
+          {emoji: '💻', description: '笔记本'},
+          {emoji: '🌞', description: '太阳'},
+          {emoji: '🌙', description: '月亮'},
+          {emoji: '⭐', description: '星星'},
+          {emoji: '☀️', description: '阳光'}
+        ],
+        faces: [
+          {emoji: '😊', description: '微笑'},
+          {emoji: '😍', description: '爱心眼'},
+          {emoji: '🥰', description: '含情脉脉'},
+          {emoji: '😂', description: '笑哭'},
+          {emoji: '🤣', description: '笑倒'},
+          {emoji: '😅', description: '汗颜'},
+          {emoji: '😎', description: '墨镜'},
+          {emoji: '🙄', description: '翻白眼'},
+          {emoji: '😏', description: '得意'},
+          {emoji: '🤗', description: '拥抱'},
+          {emoji: '🤩', description: '星星眼'},
+          {emoji: '😇', description: '天使'},
+          {emoji: '🤔', description: '思考'},
+          {emoji: '🤭', description: '偷笑'},
+          {emoji: '😘', description: '飞吻'},
+          {emoji: '🥳', description: '派对'},
+          {emoji: '🤯', description: '头爆炸'},
+          {emoji: '😌', description: '放松'},
+          {emoji: '😒', description: '不悦'},
+          {emoji: '🙃', description: '倒脸'},
+          {emoji: '😉', description: '眨眼'},
+          {emoji: '😋', description: '美味'},
+          {emoji: '😜', description: '调皮'},
+          {emoji: '🤪', description: '疯狂'},
+          {emoji: '😝', description: '开玩笑'},
+          {emoji: '🤨', description: '怀疑'},
+          {emoji: '🧐', description: '单眼镜'},
+          {emoji: '😤', description: '哼气'},
+          {emoji: '😠', description: '生气'},
+          {emoji: '🥺', description: '可怜'},
+          {emoji: '😢', description: '哭泣'},
+          {emoji: '😭', description: '大哭'},
+          {emoji: '😴', description: '睡觉'},
+          {emoji: '🥱', description: '打哈欠'},
+          {emoji: '😷', description: '口罩'},
+          {emoji: '🤕', description: '头部绷带'},
+          {emoji: '🤒', description: '发烧'},
+          {emoji: '🤢', description: '恶心'},
+          {emoji: '🤮', description: '呕吐'},
+          {emoji: '😵', description: '眩晕'},
+          {emoji: '🤠', description: '牛仔帽'}
+        ],
+        numbers: [
+          {emoji: '1️⃣', description: '数字1'},
+          {emoji: '2️⃣', description: '数字2'},
+          {emoji: '3️⃣', description: '数字3'},
+          {emoji: '4️⃣', description: '数字4'},
+          {emoji: '5️⃣', description: '数字5'},
+          {emoji: '6️⃣', description: '数字6'},
+          {emoji: '7️⃣', description: '数字7'},
+          {emoji: '8️⃣', description: '数字8'},
+          {emoji: '9️⃣', description: '数字9'},
+          {emoji: '🔟', description: '数字10'},
+          {emoji: '0️⃣', description: '数字0'},
+          {emoji: '🔢', description: '数字输入'},
+          {emoji: '#️⃣', description: '井号'},
+          {emoji: '*️⃣', description: '星号'},
+          {emoji: '①', description: '圆圈1'},
+          {emoji: '②', description: '圆圈2'},
+          {emoji: '③', description: '圆圈3'},
+          {emoji: '④', description: '圆圈4'},
+          {emoji: '⑤', description: '圆圈5'},
+          {emoji: '⑥', description: '圆圈6'},
+          {emoji: '⑦', description: '圆圈7'},
+          {emoji: '⑧', description: '圆圈8'},
+          {emoji: '⑨', description: '圆圈9'},
+          {emoji: '⑩', description: '圆圈10'},
+          {emoji: '⑪', description: '圆圈11'},
+          {emoji: '⑫', description: '圆圈12'},
+          {emoji: '⑬', description: '圆圈13'},
+          {emoji: '⑭', description: '圆圈14'},
+          {emoji: '⑮', description: '圆圈15'},
+          {emoji: '⑯', description: '圆圈16'},
+          {emoji: '⑰', description: '圆圈17'},
+          {emoji: '⑱', description: '圆圈18'},
+          {emoji: '⑲', description: '圆圈19'},
+          {emoji: '⑳', description: '圆圈20'},
+          {emoji: '⓪', description: '圆圈0'},
+          {emoji: 'Ⓐ', description: '圆圈A'},
+          {emoji: 'Ⓑ', description: '圆圈B'},
+          {emoji: 'Ⓒ', description: '圆圈C'},
+          {emoji: 'Ⓓ', description: '圆圈D'},
+          {emoji: 'Ⓔ', description: '圆圈E'}
+        ],
+        symbols: [
+          {emoji: '✅', description: '勾选标记'},
+          {emoji: '✔️', description: '勾选'},
+          {emoji: '✓', description: '勾号'},
+          {emoji: '☑️', description: '勾选框'},
+          {emoji: '❌', description: '叉号'},
+          {emoji: '❎', description: '叉号方框'},
+          {emoji: '⭕', description: '红圈'},
+          {emoji: '✖️', description: '乘号'},
+          {emoji: '➖', description: '减号'},
+          {emoji: '➕', description: '加号'},
+          {emoji: '➗', description: '除号'},
+          {emoji: '‼️', description: '双叹号'},
+          {emoji: '⁉️', description: '问叹号'},
+          {emoji: '❓', description: '问号'},
+          {emoji: '❔', description: '白问号'},
+          {emoji: '❗', description: '叹号'},
+          {emoji: '❕', description: '白叹号'},
+          {emoji: '⚠️', description: '警告'},
+          {emoji: '⚡', description: '闪电'},
+          {emoji: '💢', description: '怒气'},
+          {emoji: '☢️', description: '辐射'},
+          {emoji: '☣️', description: '生物危害'},
+          {emoji: '⚜️', description: '百合花徽'},
+          {emoji: '⭐', description: '星星'},
+          {emoji: '💯', description: '100分'},
+          {emoji: '🔴', description: '红点'},
+          {emoji: '🟠', description: '橙点'},
+          {emoji: '🟡', description: '黄点'},
+          {emoji: '🟢', description: '绿点'},
+          {emoji: '🔵', description: '蓝点'},
+          {emoji: '🟣', description: '紫点'},
+          {emoji: '⚫', description: '黑点'},
+          {emoji: '⚪', description: '白点'},
+          {emoji: '🟤', description: '棕点'},
+          {emoji: '⬆️', description: '上箭头'},
+          {emoji: '↗️', description: '右上箭头'},
+          {emoji: '➡️', description: '右箭头'},
+          {emoji: '↘️', description: '右下箭头'},
+          {emoji: '⬇️', description: '下箭头'},
+          {emoji: '↙️', description: '左下箭头'},
+          {emoji: '⬅️', description: '左箭头'},
+          {emoji: '↖️', description: '左上箭头'},
+          {emoji: '↕️', description: '上下箭头'},
+          {emoji: '↔️', description: '左右箭头'},
+          {emoji: '🔄', description: '循环箭头'},
+          {emoji: '♻️', description: '回收标志'},
+          {emoji: '🔃', description: '顺时针箭头'},
+          {emoji: '🔙', description: '返回箭头'},
+          {emoji: '🔚', description: '结束箭头'},
+          {emoji: '🔝', description: '顶部箭头'},
+          {emoji: '🔜', description: '快捷箭头'}
+        ],
+        plants: [
+          {emoji: '🌱', description: '幼苗'},
+          {emoji: '🌿', description: '草药'},
+          {emoji: '☘️', description: '三叶草'},
+          {emoji: '🍀', description: '四叶草'},
+          {emoji: '🌵', description: '仙人掌'},
+          {emoji: '🌴', description: '棕榈树'},
+          {emoji: '🌲', description: '常青树'},
+          {emoji: '🌳', description: '落叶树'},
+          {emoji: '🍁', description: '枫叶'},
+          {emoji: '🍂', description: '落叶'},
+          {emoji: '🍃', description: '飘动的叶子'},
+          {emoji: '🎋', description: '七夕树'},
+          {emoji: '🎍', description: '松饰'},
+          {emoji: '🍄', description: '蘑菇'},
+          {emoji: '🌷', description: '郁金香'},
+          {emoji: '🌹', description: '玫瑰'},
+          {emoji: '🥀', description: '凋谢的花'},
+          {emoji: '🌺', description: '芙蓉'},
+          {emoji: '🌸', description: '樱花'},
+          {emoji: '🌼', description: '花朵'},
+          {emoji: '🌻', description: '向日葵'},
+          {emoji: '🌞', description: '太阳花'},
+          {emoji: '🌾', description: '稻穗'},
+          {emoji: '💐', description: '花束'},
+          {emoji: '🌰', description: '栗子'},
+          {emoji: '🌵', description: '仙人掌'},
+          {emoji: '🥜', description: '花生'},
+          {emoji: '🥥', description: '椰子'},
+          {emoji: '🌳', description: '落叶树'},
+          {emoji: '🌲', description: '常青树'},
+          {emoji: '🏝️', description: '荒岛'},
+          {emoji: '🪴', description: '盆栽'},
+          {emoji: '🪵', description: '木头'},
+          {emoji: '🌋', description: '火山'}
+        ],
+        animals: [
+          {emoji: '🐶', description: '狗'},
+          {emoji: '🐕', description: '狗站立'},
+          {emoji: '🦮', description: '导盲犬'},
+          {emoji: '🐩', description: '贵宾犬'},
+          {emoji: '🐺', description: '狼'},
+          {emoji: '🦊', description: '狐狸'},
+          {emoji: '🦝', description: '浣熊'},
+          {emoji: '🐱', description: '猫'},
+          {emoji: '🐈', description: '猫站立'},
+          {emoji: '🦁', description: '狮子'},
+          {emoji: '🐯', description: '虎'},
+          {emoji: '🐅', description: '虎站立'},
+          {emoji: '🐆', description: '豹'},
+          {emoji: '🐴', description: '马'},
+          {emoji: '🐎', description: '奔马'},
+          {emoji: '🦄', description: '独角兽'},
+          {emoji: '🦓', description: '斑马'},
+          {emoji: '🦌', description: '鹿'},
+          {emoji: '🐮', description: '牛'},
+          {emoji: '🐂', description: '公牛'},
+          {emoji: '🐃', description: '水牛'},
+          {emoji: '🐄', description: '奶牛'},
+          {emoji: '🐷', description: '猪'},
+          {emoji: '🐖', description: '猪站立'},
+          {emoji: '🐗', description: '野猪'},
+          {emoji: '🐏', description: '公羊'},
+          {emoji: '🐑', description: '绵羊'},
+          {emoji: '🐐', description: '山羊'},
+          {emoji: '🐪', description: '骆驼'},
+          {emoji: '🐫', description: '双峰骆驼'},
+          {emoji: '🦙', description: '羊驼'},
+          {emoji: '🦒', description: '长颈鹿'},
+          {emoji: '🐘', description: '大象'},
+          {emoji: '🦏', description: '犀牛'},
+          {emoji: '🦛', description: '河马'},
+          {emoji: '🐭', description: '老鼠'},
+          {emoji: '🐁', description: '鼠站立'},
+          {emoji: '🐀', description: '大老鼠'},
+          {emoji: '🐹', description: '仓鼠'},
+          {emoji: '🐰', description: '兔子'},
+          {emoji: '🐇', description: '兔站立'},
+          {emoji: '🐿️', description: '松鼠'},
+          {emoji: '🦔', description: '刺猬'},
+          {emoji: '🦇', description: '蝙蝠'},
+          {emoji: '🐻', description: '熊'},
+          {emoji: '🐨', description: '考拉'},
+          {emoji: '🐼', description: '熊猫'},
+          {emoji: '🦥', description: '树懒'},
+          {emoji: '🦦', description: '水獭'},
+          {emoji: '🦨', description: '臭鼬'},
+          {emoji: '🦘', description: '袋鼠'},
+          {emoji: '🦡', description: '獾'},
+          {emoji: '🐾', description: '爪印'},
+          {emoji: '🦃', description: '火鸡'},
+          {emoji: '🐔', description: '鸡'},
+          {emoji: '🐓', description: '公鸡'},
+          {emoji: '🐣', description: '小鸡破壳'},
+          {emoji: '🐤', description: '小鸡'},
+          {emoji: '🐥', description: '小鸡正面'},
+          {emoji: '🐦', description: '鸟'},
+          {emoji: '🐧', description: '企鹅'},
+          {emoji: '🕊️', description: '和平鸽'},
+          {emoji: '🦅', description: '鹰'},
+          {emoji: '🦆', description: '鸭子'},
+          {emoji: '🦢', description: '天鹅'},
+          {emoji: '🦉', description: '猫头鹰'},
+          {emoji: '🦩', description: '火烈鸟'},
+          {emoji: '🦚', description: '孔雀'},
+          {emoji: '🦜', description: '鹦鹉'},
+          {emoji: '🐸', description: '青蛙'},
+          {emoji: '🐊', description: '鳄鱼'},
+          {emoji: '🐢', description: '乌龟'},
+          {emoji: '🦎', description: '蜥蜴'},
+          {emoji: '🐍', description: '蛇'},
+          {emoji: '🐲', description: '龙脸'},
+          {emoji: '🐉', description: '龙'},
+          {emoji: '🦕', description: '蜥脚类恐龙'},
+          {emoji: '🦖', description: '霸王龙'},
+          {emoji: '🐙', description: '章鱼'},
+          {emoji: '🦑', description: '鱿鱼'},
+          {emoji: '🦐', description: '虾'},
+          {emoji: '🦞', description: '龙虾'},
+          {emoji: '🦀', description: '螃蟹'},
+          {emoji: '🐠', description: '热带鱼'},
+          {emoji: '🐟', description: '鱼'},
+          {emoji: '🐡', description: '河豚'},
+          {emoji: '🐬', description: '海豚'},
+          {emoji: '🐳', description: '喷水鲸鱼'},
+          {emoji: '🐋', description: '鲸鱼'},
+          {emoji: '🦈', description: '鲨鱼'},
+          {emoji: '🦋', description: '蝴蝶'},
+          {emoji: '🐛', description: '毛毛虫'},
+          {emoji: '🐜', description: '蚂蚁'},
+          {emoji: '🐝', description: '蜜蜂'},
+          {emoji: '🐞', description: '瓢虫'},
+          {emoji: '🦗', description: '蟋蟀'},
+          {emoji: '🕷️', description: '蜘蛛'},
+          {emoji: '🕸️', description: '蜘蛛网'},
+          {emoji: '🦂', description: '蝎子'},
+          {emoji: '🦟', description: '蚊子'},
+          {emoji: '🦠', description: '微生物'}
+        ],
+        foods: [
+          {emoji: '🍎', description: '红苹果'},
+          {emoji: '🍏', description: '青苹果'},
+          {emoji: '🍐', description: '梨'},
+          {emoji: '🍊', description: '橘子'},
+          {emoji: '🍋', description: '柠檬'},
+          {emoji: '🍌', description: '香蕉'},
+          {emoji: '🍉', description: '西瓜'},
+          {emoji: '🍇', description: '葡萄'},
+          {emoji: '🍓', description: '草莓'},
+          {emoji: '🍈', description: '甜瓜'},
+          {emoji: '🍒', description: '樱桃'},
+          {emoji: '🍑', description: '桃子'},
+          {emoji: '🥭', description: '芒果'},
+          {emoji: '🍍', description: '菠萝'},
+          {emoji: '🥥', description: '椰子'},
+          {emoji: '🥝', description: '猕猴桃'},
+          {emoji: '🍅', description: '番茄'},
+          {emoji: '🥑', description: '牛油果'},
+          {emoji: '🍆', description: '茄子'},
+          {emoji: '🥔', description: '土豆'},
+          {emoji: '🥕', description: '胡萝卜'},
+          {emoji: '🌽', description: '玉米'},
+          {emoji: '🌶️', description: '辣椒'},
+          {emoji: '🥒', description: '黄瓜'},
+          {emoji: '🥬', description: '绿叶蔬菜'},
+          {emoji: '🥦', description: '西兰花'},
+          {emoji: '🧄', description: '大蒜'},
+          {emoji: '🧅', description: '洋葱'},
+          {emoji: '🍄', description: '蘑菇'},
+          {emoji: '🥜', description: '花生'},
+          {emoji: '🌰', description: '栗子'},
+          {emoji: '🍞', description: '面包'},
+          {emoji: '🥐', description: '牛角面包'},
+          {emoji: '🥖', description: '法棍'},
+          {emoji: '🥨', description: '椒盐卷饼'},
+          {emoji: '🥯', description: '百吉饼'},
+          {emoji: '🥞', description: '煎饼'},
+          {emoji: '🧇', description: '华夫饼'},
+          {emoji: '🧀', description: '奶酪'},
+          {emoji: '🍖', description: '肉'},
+          {emoji: '🍗', description: '鸡腿'},
+          {emoji: '🥩', description: '牛排'},
+          {emoji: '🥓', description: '培根'},
+          {emoji: '🍔', description: '汉堡'},
+          {emoji: '🍟', description: '薯条'},
+          {emoji: '🍕', description: '披萨'},
+          {emoji: '🌭', description: '热狗'},
+          {emoji: '🥪', description: '三明治'},
+          {emoji: '🌮', description: '墨西哥卷饼'},
+          {emoji: '🌯', description: '墨西哥卷饼'},
+          {emoji: '🥙', description: '皮塔饼'},
+          {emoji: '🧆', description: '法拉费尔'},
+          {emoji: '🥚', description: '蛋'},
+          {emoji: '🍳', description: '煎蛋'},
+          {emoji: '🥘', description: '浅底锅'},
+          {emoji: '🍲', description: '煲仔饭'},
+          {emoji: '🥣', description: '碗勺'},
+          {emoji: '🥗', description: '绿色沙拉'},
+          {emoji: '🍿', description: '爆米花'},
+          {emoji: '🧈', description: '黄油'},
+          {emoji: '🧂', description: '盐'},
+          {emoji: '🥫', description: '罐头食品'},
+          {emoji: '🍱', description: '便当'},
+          {emoji: '🍘', description: '米饼'},
+          {emoji: '🍙', description: '饭团'},
+          {emoji: '🍚', description: '米饭'},
+          {emoji: '🍛', description: '咖喱饭'},
+          {emoji: '🍜', description: '蒸面条'},
+          {emoji: '🍝', description: '意大利面'},
+          {emoji: '🍠', description: '烤红薯'},
+          {emoji: '🍢', description: '串烧'},
+          {emoji: '🍣', description: '寿司'},
+          {emoji: '🍤', description: '油炸虾'},
+          {emoji: '🍥', description: '鱼饼'},
+          {emoji: '🥮', description: '月饼'},
+          {emoji: '🍡', description: '丸子'},
+          {emoji: '🥟', description: '饺子'},
+          {emoji: '🥠', description: '幸运饼干'},
+          {emoji: '🥡', description: '外卖盒'},
+          {emoji: '🦪', description: '牡蛎'},
+          {emoji: '🍦', description: '软冰淇淋'},
+          {emoji: '🍧', description: '刨冰'},
+          {emoji: '🍨', description: '冰淇淋'},
+          {emoji: '🍩', description: '甜甜圈'},
+          {emoji: '🍪', description: '饼干'},
+          {emoji: '🎂', description: '生日蛋糕'},
+          {emoji: '🍰', description: '蛋糕'},
+          {emoji: '🧁', description: '纸杯蛋糕'},
+          {emoji: '🥧', description: '派'},
+          {emoji: '🍫', description: '巧克力'},
+          {emoji: '🍬', description: '糖果'},
+          {emoji: '🍭', description: '棒棒糖'},
+          {emoji: '🍮', description: '布丁'},
+          {emoji: '🍯', description: '蜂蜜罐'},
+          {emoji: '🍼', description: '奶瓶'},
+          {emoji: '🥛', description: '牛奶杯'},
+          {emoji: '☕', description: '热饮'},
+          {emoji: '🍵', description: '茶'},
+          {emoji: '🍶', description: '清酒'},
+          {emoji: '🍾', description: '香槟'},
+          {emoji: '🍷', description: '红酒'},
+          {emoji: '🍸', description: '鸡尾酒'},
+          {emoji: '🍹', description: '热带饮料'},
+          {emoji: '🍺', description: '啤酒'},
+          {emoji: '🍻', description: '干杯'},
+          {emoji: '🥂', description: '碰杯'},
+          {emoji: '🥃', description: '烈酒'},
+          {emoji: '🥤', description: '杯子和吸管'},
+          {emoji: '🧃', description: '饮料盒'},
+          {emoji: '🧉', description: '马黛茶'},
+          {emoji: '🧊', description: '冰'}
+        ]
+      };
+      
+      // 当前选中的表情
+      let currentEmoji = '🤔';
+      let currentNumberEmoji = '1️⃣';
+      let currentCustomParagraphEmoji = '🤔';
+      
+      // 存储每个段落的自定义表情
+      const paragraphEmojis = {};
+      
+      // 选项卡切换
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.panel');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const tabId = this.dataset.tab;
+          
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          panels.forEach(panel => panel.classList.remove('active'));
+          
+          this.classList.add('active');
+          document.getElementById(`${tabId}-panel`).classList.add('active');
+        });
+      });
+      
+      // 初始化表情选择器
+      function initEmojiSelectors() {
+        // 主表情选择器
+        loadEmojisForCategory('common', emojiSelector);
+        
+        // 自定义段落表情选择器
+        loadEmojisForCategory('common', document.querySelector('.custom-paragraph-emoji'));
+        
+        // 数字表情选择器
+        loadEmojisForCategory('numbers', numberEmojiSelector);
+      }
+      
+      // 加载指定分类的表情
+      function loadEmojisForCategory(category, container) {
+        container.innerHTML = '';
+        
+        emojiData[category].forEach(item => {
+          const emojiBtn = document.createElement('span');
+          emojiBtn.className = 'emoji-btn';
+          emojiBtn.dataset.emoji = item.emoji;
+          emojiBtn.title = item.description;
+          emojiBtn.textContent = item.emoji;
+          container.appendChild(emojiBtn);
+        });
+        
+        // 默认选中第一个
+        if (container.querySelector('.emoji-btn')) {
+          container.querySelector('.emoji-btn').classList.add('active');
+          
+          if (container === emojiSelector) {
+            currentEmoji = container.querySelector('.emoji-btn').dataset.emoji;
+          } else if (container === document.querySelector('.custom-paragraph-emoji')) {
+            currentCustomParagraphEmoji = container.querySelector('.emoji-btn').dataset.emoji;
+          } else if (container === numberEmojiSelector) {
+            currentNumberEmoji = container.querySelector('.emoji-btn').dataset.emoji;
+          }
+        }
+        
+        // 绑定点击事件
+        container.querySelectorAll('.emoji-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            container.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 更新当前选中的表情
+            if (container === emojiSelector) {
+              currentEmoji = this.dataset.emoji;
+            } else if (container === document.querySelector('.custom-paragraph-emoji')) {
+              currentCustomParagraphEmoji = this.dataset.emoji;
+            } else if (container === numberEmojiSelector) {
+              currentNumberEmoji = this.dataset.emoji;
+            }
+          });
+        });
+      }
+      
+      // 绑定表情分类按钮事件
+      function initEmojiCategoryButtons() {
+        // 主表情排版分类
+        document.querySelectorAll('#emojiCategories .emoji-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('#emojiCategories .emoji-category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadEmojisForCategory(this.dataset.category, emojiSelector);
+          });
+        });
+        
+        // 自定义排版分类
+        document.querySelectorAll('#customEmojiCategories .emoji-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('#customEmojiCategories .emoji-category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadEmojisForCategory(this.dataset.category, document.querySelector('.custom-paragraph-emoji'));
+          });
+        });
+        
+        // 数字表情分类
+        document.querySelectorAll('#numberEmojiCategories .emoji-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('#numberEmojiCategories .emoji-category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadEmojisForCategory(this.dataset.category, numberEmojiSelector);
+          });
+        });
+      }
+      
+      // 应用表情到选中段落
+      applyParagraphEmoji.addEventListener('click', function() {
+        const paragraphIndex = paragraphToApplyEmoji.value;
+        
+        if (paragraphIndex === 'all') {
+          // 应用到所有段落
+          for (let i = 0; i < 20; i++) {
+            paragraphEmojis[i] = currentCustomParagraphEmoji;
+          }
+        } else {
+          // 应用到指定段落
+          paragraphEmojis[paragraphIndex] = currentCustomParagraphEmoji;
+        }
+        
+        // 更新预览
+        formatText();
+      });
+      
+      // 自定义分隔符显示/隐藏
+      separatorType.addEventListener('change', function() {
+        customSeparatorGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+      
+      // 表情排版自定义分隔符显示/隐藏
+      emojiSeparatorType.addEventListener('change', function() {
+        emojiCustomSeparatorGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+      
+      // 自定义排版自定义分隔符显示/隐藏
+      customSeparatorType.addEventListener('change', function() {
+        customCustomSeparatorGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+      });
+      
+      // 获取分隔符
+      function getSeparator(type, custom, style) {
+        let separator = '';
+        
+        switch (type.value) {
+          case 'dot':
+            separator = '·';
+            break;
+          case 'dash':
+            separator = '-';
+            break;
+          case 'star':
+            separator = '*';
+            break;
+          case 'arrow':
+            separator = '→';
+            break;
+          case 'heart':
+            separator = '♥';
+            break;
+          case 'custom':
+            separator = custom.value || '·';
+            break;
+          default:
+            return '';
+        }
+        
+        // 应用分隔符样式
+        switch (style.value) {
+          case 'simple':
+            return separator;
+          case 'spaced':
+            return ` ${separator} `;
+          case 'triple':
+            return separator.repeat(3);
+          case 'centered':
+            return `   ${separator}   `;
+          default:
+            return separator;
+        }
+      }
+      
+      // 格式化文本
+      function formatText() {
+        if (!inputText.value.trim()) return;
+        
+        // 分割段落
+        const paragraphs = inputText.value
+          .split('\n')
+          .filter(p => p.trim().length > 0);
+        
+        let formattedText = '';
+        const activePanel = document.querySelector('.panel.active').id;
+        
+        // 根据选中的面板应用不同的格式
+        switch (activePanel) {
+          case 'separator-panel':
+            // 获取当前面板的分隔符
+            const separator = getSeparator(separatorType, customSeparator, separatorStyle);
+            
+            // 检查是否已经包含分隔符
+            const containsSeparator = paragraphs.some(p => p.trim() === separator.trim());
+            
+            if (containsSeparator) {
+              // 如果已经包含分隔符，使用同样的分隔符替换，但不添加额外行
+              formattedText = paragraphs.join('\n');
+            } else {
+              // 如果不包含分隔符，添加分隔符
+              if (separator) {
+                formattedText = paragraphs.join(`\n${separator}\n`);
+              } else {
+                formattedText = paragraphs.join('\n');
+              }
+            }
+            break;
+            
+          case 'emoji-panel':
+            // 处理每个段落添加表情
+            paragraphs.forEach((paragraph, index) => {
+              // 识别段落开头的表情符号
+              const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u;
+              let paragraphText = paragraph;
+              
+              // 如果段落开头有表情
+              if (emojiRegex.test(paragraph)) {
+                if (keepOriginalEmojis.checked) {
+                  // 保留原有表情
+                } else {
+                  // 替换原有表情 - 先移除开头的表情和它后面的空格
+                  paragraphText = paragraph.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)\s*/u, '');
+                  
+                  // 检查是否有其他符号
+                  const symbolRegex = /^[\p{So}\p{Sc}\p{Sm}\p{Po}\p{Ps}\p{Pe}]/u;
+                  const hasSymbolStart = symbolRegex.test(paragraphText);
+                  
+                  // 只有当段落开头没有其他符号时才添加表情
+                  if (!hasSymbolStart) {
+                    // 根据选择的模式添加新表情
+                    let emoji = currentEmoji;
+                    
+                    switch (emojiMode.value) {
+                      case 'first':
+                        if (index === 0) {
+                          paragraphText = `${emoji} ${paragraphText}`;
+                        }
+                        break;
+                      case 'all-same':
+                        paragraphText = `${emoji} ${paragraphText}`;
+                        break;
+                      case 'all-random':
+                        const emojis = Array.from(emojiSelector.querySelectorAll('.emoji-btn')).map(btn => btn.dataset.emoji);
+                        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                        paragraphText = `${randomEmoji} ${paragraphText}`;
+                        break;
+                      case 'alternate':
+                        const alternateEmojis = Array.from(emojiSelector.querySelectorAll('.emoji-btn')).map(btn => btn.dataset.emoji);
+                        const alternateEmoji = alternateEmojis[index % alternateEmojis.length];
+                        paragraphText = `${alternateEmoji} ${paragraphText}`;
+                        break;
+                    }
+                  }
+                }
+              } else {
+                // 如果段落开头没有表情
+                // 检查是否有其他符号
+                const symbolRegex = /^[\p{So}\p{Sc}\p{Sm}\p{Po}\p{Ps}\p{Pe}]/u;
+                const hasSymbolStart = symbolRegex.test(paragraph);
+                
+                // 只有当段落开头没有其他符号时才添加表情
+                if (!hasSymbolStart) {
+                  // 根据选择的模式添加表情
+                  let emoji = currentEmoji;
+                  
+                  switch (emojiMode.value) {
+                    case 'first':
+                      if (index === 0) {
+                        paragraphText = `${emoji} ${paragraphText}`;
+                      }
+                      break;
+                    case 'all-same':
+                      paragraphText = `${emoji} ${paragraphText}`;
+                      break;
+                    case 'all-random':
+                      const emojis = Array.from(emojiSelector.querySelectorAll('.emoji-btn')).map(btn => btn.dataset.emoji);
+                      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                      paragraphText = `${randomEmoji} ${paragraphText}`;
+                      break;
+                    case 'alternate':
+                      const alternateEmojis = Array.from(emojiSelector.querySelectorAll('.emoji-btn')).map(btn => btn.dataset.emoji);
+                      const alternateEmoji = alternateEmojis[index % alternateEmojis.length];
+                      paragraphText = `${alternateEmoji} ${paragraphText}`;
+                      break;
+                  }
+                }
+              }
+              
+              formattedText += paragraphText + '\n\n';
+            });
+            
+            formattedText = formattedText.trim();
+            
+            // 检查是否需要添加分隔符
+            const emojiSeparator = getSeparator(emojiSeparatorType, emojiCustomSeparator, emojiSeparatorStyle);
+            
+            if (emojiSeparator) {
+              // 以分隔符分割之前的结果
+              const formattedParagraphs = formattedText.split('\n\n');
+              formattedText = formattedParagraphs.join(`\n${emojiSeparator}\n`);
+            }
+            break;
+            
+          case 'custom-panel':
+            // 处理自定义排版
+            paragraphs.forEach((paragraph, index) => {
+              let formattedParagraph = paragraph;
+              
+              // 检测段落开头是否已有符号或表情（包括各种特殊字符和符号）
+              const symbolRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|[\p{So}\p{Sc}\p{Sm}\p{Po}\p{Ps}\p{Pe}])/u;
+              const hasSymbolStart = symbolRegex.test(paragraph);
+              
+              // 首行缩进
+              switch (indentStyle.value) {
+                case 'space-2':
+                  formattedParagraph = '  ' + formattedParagraph;
+                  break;
+                case 'space-4':
+                  formattedParagraph = '    ' + formattedParagraph;
+                  break;
+                case 'tab':
+                  formattedParagraph = '\t' + formattedParagraph;
+                  break;
+              }
+              
+              // 只有当段落开头没有符号时才添加表情或序号
+              if (!hasSymbolStart) {
+                // 应用自定义段落表情
+                if (customParagraphEmoji.checked && paragraphEmojis[index]) {
+                  formattedParagraph = `${paragraphEmojis[index]} ${formattedParagraph}`;
+                }
+                // 添加序号或数字表情
+                else if (useNumberEmoji.checked) {
+                  // 为不同段落使用不同的数字表情
+                  const numberEmojis = Array.from(numberEmojiSelector.querySelectorAll('.emoji-btn')).map(btn => btn.dataset.emoji);
+                  const emojiIndex = index % numberEmojis.length;
+                  formattedParagraph = `${numberEmojis[emojiIndex]} ${formattedParagraph}`;
+                } else if (numberedParagraphs.checked) {
+                  formattedParagraph = `${index + 1}. ${formattedParagraph}`;
+                }
+              }
+              
+              // 添加引号
+              if (addQuotes.checked) {
+                formattedParagraph = `"${formattedParagraph}"`;
+              }
+              
+              // 添加段落
+              formattedText += formattedParagraph + '\n\n';
+            });
+            
+            formattedText = formattedText.trim();
+            
+            // 检查是否需要添加分隔符
+            const customSep = getSeparator(customSeparatorType, customCustomSeparator, customSeparatorStyle);
+            
+            if (customSep) {
+              // 以分隔符分割之前的结果
+              const formattedParagraphs = formattedText.split('\n\n');
+              formattedText = formattedParagraphs.join(`\n${customSep}\n`);
+            }
+            break;
+        }
+        
+        outputText.textContent = formattedText;
+      }
+      
+      // 按钮事件监听
+      formatBtn.addEventListener('click', formatText);
+      
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(outputText.textContent).then(() => {
+          const originalText = this.textContent;
+          this.textContent = '已复制！';
+          setTimeout(() => {
+            this.textContent = originalText;
+          }, 1500);
+        });
+      });
+      
+      // 初始化表情选择器和分类
+      initEmojiSelectors();
+      initEmojiCategoryButtons();
+      
+      // 不加载示例文本，保持输入框为空
+      inputText.value = ``;
+      
+      // 初始化
+      formatText();
+    });
+  </script>
+</body>
+</html>
